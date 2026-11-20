@@ -1,0 +1,15 @@
+
+Files:
+uart.c/h
+
+
+
+
+
+
+
+
+
+CMSIS path:
+${ProjDirPath}\chip_headers\CMSIS\Include
+${ProjDirPath}\chip_headers\CMSIS\Device\ST\STM32F4xx\Include
