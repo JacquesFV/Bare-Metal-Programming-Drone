@@ -1,0 +1,181 @@
+
+
+STM32 Nucleo-F411RE UART Cheat Sheet
+
+
+USART
+        *USART1
+            TX: PA9
+            RX: PA10
+        *USART2
+            TX: PA2
+            RX: PA3
+        *USART6
+            TX: PC6
+            RX: PC7
+
+-------------------------------------------------------------------
+Clock Enable Register (32 bits) for GPIO A, B, C, D, E, H: RCC->AHB1ENR 
+	GPIOAEN: bit 0
+	GPIOBEN: bit 1
+	GPIOCEN: bit 2
+	GPIODEN: bit 3
+	GPIOEEN: bit 4
+	GPIOHEN: bit 7
+
+
+GPIO Port Mode Register (32 bits): GPIOx->MODER
+	Bits 2y:2y+1 where MODERy[1:0]: Port x configuration bits (y = 0...15)
+		ex: PA9 as Alternate Function
+			Port A Pin 9
+			2(9): 2(9)+1 = bits 18:19
+		   thus: GPIOA->MODER &= ~(1U<<18) and GPIOA->MODER |= (1U<<19)
+	
+	Configuration:
+	00: Input (reset state)
+	01: General Purpose Output Mode
+	10: Alternate Function Mode
+	11: Analog Mode
+
+Alternate Function Registers: 
+	lower register = GPIOx->AFR[0] ; Pins 0 - 7
+      
+      |31 30 29 28|  |27 26 25 24|  |23 22 21 20|  |19 18 17 16|
+      | AFRL7[3:0]|  | AFRL6[3:0]|  | AFRL5[3:0]|  | AFRL4[3:0]|
+
+      |15 14 13 12|  | 11 10 9 8 |  | 7 6 5 4  |  | 3 2 1 0  |
+      | AFRL3[3:0]|  | AFRL2[3:0]|  |AFRL1[3:0]|  |AFRL0[3:0]|
+
+
+	higher register: GPIOx->AFR[1] ; Pins 8 - 15
+      
+      |31 30 29 28|  |27 26 25 24|  |23 22 21 20|  |19 18 17 16|
+      |AFRH15[3:0]|  |AFRH14[3:0]|  |AFRH13[3:0]|  |AFRH12[3:0]|
+
+      |15 14 13 12|  | 11 10 9 8 |  | 7 6 5 4  |  | 3 2 1 0  |
+      |AFRH11[3:0]|  |AFRH10[3:0]|  |AFRH9[3:0]|  |AFRH8[3:0]|
+
+
+	AF0 (system) ---------> 0000
+	AF1 (TIM1/TIM2) ------> 0001
+	AF2 (TIM3..5) --------> 0010
+	AF3 (TIM9..11) -------> 0011
+	AF4 (I2C1..3) --------> 0100
+	AF5 (SPI1..4) --------> 0101
+	AF6 (SPI3..5) --------> 0110
+	AF7 (USART1..2)-------> 0111
+	AF8 (USART6) ---------> 1000
+	AF9 (I2C2..3) --------> 1001
+	AF10 (OTG_FS) --------> 1010
+	AF11 -----------------> 1011
+	AF12 (SDIO) ----------> 1100
+	AF13 -----------------> 1101
+	AF14 -----------------> 1110
+	AF15 (EVENTOUT) ------> 1111
+
+
+Clock Enable Register for Peripherals: RCC->APB1ENR and RCC->APB2ENR
+	RCC->APB1ENR
+		TIM2EN: bit 0
+		TIM3EN: bit 1
+		TIM4EN: bit 2
+		TIM5EN: bit 3
+		WWDGEN: bit 11
+		SPI2EN: bit 14
+		SPI3EN: bit 15
+		USART2EN: bit 17
+		I2C1EN: bit 21
+		I2C2EN: bit 22
+		I2C3EN: bit 23
+		PWREN: bit 28
+	RCC->APB2ENR
+		TIM1EN: bit 0
+		USART1EN: bit 4
+		USART6EN: bit 5
+		ADC1EN: bit 8
+		SDIOEN: bit 11
+		SPI1EN: bit 12
+		SPI4EN: bit 13
+		SYSCFGEN: bit 14
+		TIM9EN: bit 16
+		TIM10EN: bit 17
+		TIM11EN: bit 18
+		SPI5EN: bit 20
+
+Baud Rate Register: USARTx->BRR
+	*BRR sets the divider that converts Peripheral clock -> Desired Baudrate
+	
+	USARTx->BRR = ((periph_clk + (baudrate/2U))/baudrate)
+		*standard integer rounding trick: compute the USART divider using integer arithmetic and round to the nearest integer instead of always truncating downward
+		**NOTE: the formula depends on which STM32 family you're using, whether oversampling is 16 or 8, 
+		 and whether the BRR register expects a simple divider or mantissa/fraction format
+
+USART Control Registers: 
+    USARTx->CR1
+       |  15 | |14 | |13| |12| | 11 | | 10| | 9| | 8  | |  7  | |  6 | |   5  | |   4  | | 3| | 2| | 1 | | 0 |
+       |OVER8| |Res| |UE| | M| |WAKE| |PCE| |PS| |PEIE| |TXEIE| |TCIE| |RXNEIE| |IDLEIE| |TE| |RE| |RWU| |SBK|
+
+    	OVER8: Oversampling mode
+		Rule of thumb: use default OVER8 = 0 UNLESS you need a very high baudrate, you run out of peripheral clock to generate that baud rate, and the datasheet/application specifically recommendes oversampling by 8
+	UE: USART enable
+	M: Word length
+	WAKE: Wake up method
+	PCE: Parity control enable
+	PS: Parity selection: 0 =  even parity; 1 = odd parity
+	PEIE: PE Interrupt enable
+	TXEIE: TXE interrupt enable
+	TCIE: Transmission complete interrupt enable
+	RXNEIE: RXNE interrupt enable
+	IDLEIE: IDLE interrupt enable
+	TE: Transmitter enable
+	RE: Receiver enable
+	RWU: Receiver wake up
+	SBK: send break
+    
+    USARTx->CR2
+       |15 | |  14 | |  13 12  | | 11  | | 10 | | 9  | | 8  | | 7 | |  6  | |  5 | | 4 | | 3 2 1 0|
+       |Res| |LINEN| |STOP[1:0]| |CLKEN| |CPOL| |CPHA| |LBCL| |Res| |LBDIE| |LBDL| |Res| |ADD[3:0]|
+
+	LINEN: LIN mode enable
+	STOP: STOP bits
+	CLKEN: Clock enable
+	CPOL: Clock polarity: 0 = steady low value on CK pin outside transmission window; 1 = steady high value on CK pin outside transmission window
+	CPHA: Clock phase: 0 = first clock transition is the first data capture edge; 1 = second clock transition is the first data capture edge
+	LBCL: Last bit clock pulse: 0 = clock puse of the last bit is not output in the CK pin; 1 = clock puse of the last data bit is outside to the CK pin
+	LBDIE: LIN break detection interrupt enable
+	LBDL: LIN break detection length
+	ADD[3:0]: Address of teh USART node
+    
+    USARTx->CR3
+       |15 14 13 12| | 11   | | 10  | |  9 | | 8  | | 7  | |  6 | |  5 | |  4 | |   3 | |  2 | |  1 | | 0 |
+       |    Res    | |ONEBIT| |CTSIE| |CTSE| |RTSE| |DMAT| |DMAR| |SCEN| |NACK| |HDSEL| |IRLP| |IREN| |EIE|
+
+	ONEBIT: one sample bit method enable
+	CTSIE: CTS Interrupt enable
+	CTSE: CTS enable
+	RTSE: RTS enable
+	DMAT: DMA enable transmitter
+	DMAR: DMA enable receiver
+	SCEN: Smartcard mode enable
+	NACK: Smartcard NACK enable
+	HDSEL: Half-duplex selection
+	IRLP: IrDA low-power
+	IREN: IrDA mode enable
+	EIE: Error interrupt enable
+
+USART Status Register:
+	| 9 | | 8 | | 7 | | 6| |  5 | |  4 | | 3 | | 2| | 1| | 0|
+        |CTS| |LBD| |TXE| |TC| |RXNE| |IDLE| |ORE| |NF| |FE| |PE|
+
+	CTS: CTS (clear to send) flag
+	LBD: LIN (local interconnect network) break detection flag
+	TXE: Transmit data register empty ---> can send next byte
+	TC: Transmission complete ----> everything finished transmitting
+	RXNE: Read data register not empty --- a byte has arrived
+	IDLE: IDLE line detected
+	ORE: Overrun error
+	NF: Noise detected flag
+	FE: Framing error
+	PE: Parity error
+
+
