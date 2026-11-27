@@ -67,7 +67,7 @@ DMA x Stream y Configuration Register: DMAx_Streamy->CR
       DMEIE: direct mode error interrupt enable
       EN: stream enable/flag stream ready when read low
 
-DMA High Interrupt Status Register: DMAx->HIFCR
+DMA High Interrupt Flag Clear Register: DMAx->HIFCR
 
       |31 30 29 28| |27    | |26    | |25    | |24     | |23  | |22    | |21    | |20    | |19    | |18     | |17  | |16    |
       |Reserved   | |CTCIF7| |CHTIF7| |CTEIF7| |CDMEIF7| |Res.| |CFEIF7| |CTCIF6| |CHTIF6| |CTEIF6| |CDMEIF6| |Res.| |CFEIF6|
@@ -82,7 +82,7 @@ DMA High Interrupt Status Register: DMAx->HIFCR
 	CFEIFx: strea, x clear FIFO error interrupt flag
 
 
-DMA Low Interrupt Status Register: DMAx->LIFCR
+DMA Low Interrupt Flag Clear Register: DMAx->LIFCR
 
       |31 30 29 28| |27    | |26    | |25    | |24     | |23  | |22    | |21    | |20    | |19    | |18     | |17  | |16    |
       |Reserved   | |CTCIF3| |CHTIF3| |CTEIF3| |CDMEIF3| |Res.| |CFEIF3| |CTCIF2| |CHTIF2| |CTEIF2| |CDMEIF2| |Res.| |CFEIF2|
@@ -94,7 +94,7 @@ DMA Low Interrupt Status Register: DMAx->LIFCR
         CHTIFx: stream x clear half transfer interrupt flag
         CTEIFx: stream x clear transfer error interrupt flag
         CDMEIFx: stream x clear direct mode error interrupt flag
-        CFEOFx: strea, x clear FIFO error interrupt flag
+        CFEIFx: stream x clear FIFO error interrupt flag
 
 DMA stream x peripheral address register: DMAx_Streamy->PAR
 	Base address of the peripheral data register from/to which the data are read/written
@@ -107,3 +107,37 @@ DMA stream x memory 1 aaddress register: DMAx_Streamy->M1AR
 
 DMA stream x number of data register: DMAx_Streamy->NDTR
 	Number of data items to be transferred (0 up to 65535)
+
+DMA Low Interrupt Status Register
+
+	|31 30 29 28| |27   | |26   | |25   | |24    | |23  | |22   | |21   | |20   | |19   | |18    | |17  | |16   |
+        |Reserved   | |TCIF3| |HTIF3| |TEIF3| |DMEIF3| |Res.| |FEIF3| |TCIF2| |HTIF2| |TEIF2| |DMEIF2| |Res.| |FEIF2|
+
+     |15 14 13 12| |11   | |10   | |9    | |8     | |7   | |6    | |5    | |4    | |3    | |2     | |1   | |0    |
+     |Reserved   | |TCIF1| |HTIF1| |TEIF1| |DMEIF1| |Res.| |FEIF1| |TCIF0| |HTIF0| |TEIF0| |DMEIF0| |Res.| |FEIF0|
+
+	TCIFx: stream x transfer complete flag
+	HTIFx: stream x half transfer interrupt
+	TEIFx: stream x transfer error interrupt
+	DMEIFx: stream x direct mode error interrupt
+	FEIF: stream x FIFO error interrupt flag
+
+DMA High Interrupt Status Register
+
+        |31 30 29 28| |27   | |26   | |25   | |24    | |23  | |22   | |21   | |20   | |19   | |18    | |17  | |16   |
+        |Reserved   | |TCIF7| |HTIF7| |TEIF7| |DMEIF7| |Res.| |FEIF7| |TCIF6| |HTIF6| |TEIF6| |DMEIF6| |Res.| |FEIF6|
+
+     |15 14 13 12| |11   | |10   | |9    | |8     | |7   | |6    | |5    | |4    | |3    | |2     | |1   | |0    |
+     |Reserved   | |TCIF5| |HTIF5| |TEIF5| |DMEIF5| |Res.| |FEIF5| |TCIF4| |HTIF4| |TEIF4| |DMEIF4| |Res.| |FEIF4|
+
+	TCIFx: stream x transfer complete flag
+        HTIFx: stream x half transfer interrupt
+        TEIFx: stream x transfer error interrupt
+        DMEIFx: stream x direct mode error interrupt
+        FEIF: stream x FIFO error interrupt flag
+
+
+
+
+
+
